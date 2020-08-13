@@ -1,3 +1,5 @@
+- [基本类型](#基本类型)
+  - [Integer缓存](#Integer缓存)
 - [JVM](#jvm)
   - [JVM 工作流程](#jvm-%e5%b7%a5%e4%bd%9c%e6%b5%81%e7%a8%8b)
   - [运行时数据区（Runtime Data Area）](#%e8%bf%90%e8%a1%8c%e6%97%b6%e6%95%b0%e6%8d%ae%e5%8c%baruntime-data-area)
@@ -51,12 +53,26 @@
 - [引用类型](#%e5%bc%95%e7%94%a8%e7%b1%bb%e5%9e%8b)
 - [动态代理](#%e5%8a%a8%e6%80%81%e4%bb%a3%e7%90%86)
 - [元注解](#%e5%85%83%e6%b3%a8%e8%a7%a3)
+# 基本类型
+| 类型 | 大小 |
+|-----------|-----------|
+| byte | 1字节 |
+| boolean | 1字节 |
+| short | 2字节 |
+| char | 2字节 |
+| int | 4字节 |
+| float | 4字节 |
+| double | 8字节 |
+| long | 8字节 |
+## Integer缓存
+该类的作用是将数值等于-128-127(默认)区间的Integer实例缓存到cache数组中。通过valueOf()方法很明显发现，当再次创建值在-128-127区间的Integer实例时，会复用缓存中的实例，也就是直接指向缓存中的Integer实例。
+(注意：这里的创建不包括用new创建，new创建对象不会复用缓存实例，通过情景3的运行结果就可以得知)
 # JVM
 ## JVM 工作流程
-![](https://user-gold-cdn.xitu.io/2019/6/23/16b833f4a4906226?w=448&h=592&f=jpeg&s=44057)
+![](img/16b833f4a4906226.jpeg)
 
 ## 运行时数据区（Runtime Data Area）
-![](https://user-gold-cdn.xitu.io/2019/6/23/16b833f4a499f6fe?w=868&h=497&f=webp&s=46378)
+![](img/16b833f4a499f6fe.jpeg)
 
 | 区域 | 说明                      
 |----------|-----|
@@ -157,7 +173,7 @@ GC 分代的基本假设：绝大部分对象的生命周期都非常短暂，�
 G1的新生代收集跟 ParNew 类似，当新生代占用达到一定比例的时候，开始出发收集。和 CMS 类似，G1 收集器收集老年代对象会有短暂停顿。
 
 ### 内存模型与回收策略
-![](https://mmbiz.qpic.cn/mmbiz_png/qdzZBE73hWsbhfAng9ibqfcbjrqgyRWqAKiaJ2U75SGYwQhs2tuNbXtu8KIpaUsBOaHRKXf7esuuFoMjELFxibIVg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/1.webp)
 
 Java 堆（Java Heap）是JVM所管理的内存中最大的一块，堆又是垃圾收集器管理的主要区域，Java 堆主要分为2个区域-年轻代与老年代，其中年轻代又分 Eden 区和 Survivor 区，其中 Survivor 区又分 From 和 To 2个区。
 
@@ -277,16 +293,16 @@ public int hashCode() {
 - 接口中的所有方法默认为：public abstract ****；
 
 # 集合框架
-![](https://user-gold-cdn.xitu.io/2019/6/23/16b833f4a86db5e6?w=643&h=611&f=gif&s=22445)
+![](img/16b833f4a86db5e6.jpeg)
 - List接口存储一组不唯一，有序（插入顺序）的对象, Set接口存储一组唯一，无序的对象。
 
 ## HashMap
 ### 结构图
 - **JDK 1.7 HashMap 结构图**
-![](https://user-gold-cdn.xitu.io/2019/6/23/16b833f4ac8f44fd?w=1636&h=742&f=png&s=88323)
+![](img/16b833f4ac8f44fd.jpeg)
 
 - **JDK 1.8 HashMap 结构图**
-![](https://user-gold-cdn.xitu.io/2018/7/23/164c47f32f9650ba?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![](img/164c47f32f9650ba.jpeg)
 
 ### HashMap 的工作原理
 HashMap 基于 hashing 原理，我们通过 put() 和 get() 方法储存和获取对象。当我们将键值对传递给 put() 方法时，它调用键对象的 hashCode() 方法来计算 hashcode，让后找到 bucket 位置来储存 Entry 对象。当两个对象的 hashcode 相同时，它们的 bucket 位置相同，‘碰撞’会发生。因为 HashMap 使用链表存储对象，这个 Entry 会存储在链表中，当获取对象时，通过键对象的 equals() 方法找到正确的键值对，然后返回值对象。
@@ -358,7 +374,7 @@ public class Hashtable<K,V>
 
 ConcurrentHashMap 最外层不是一个大的数组，而是一个 Segment 的数组。每个 Segment 包含一个与 HashMap 数据结构差不多的链表数组。
 
-![](http://www.jasongj.com/img/java/concurrenthashmap/concurrenthashmap_java7.png)
+![](img/concurrenthashmap_java7.png)
 
 在读写某个 Key 时，先取该 Key 的哈希值。并将哈希值的高 N 位对 Segment 个数取模从而得到该 Key 应该属于哪个Segment，接着如同操作 HashMap 一样操作这个 Segment。
 
@@ -384,7 +400,7 @@ HashEntry<K,V> e = (HashEntry<K,V>) UNSAFE.getObjectVolatile
 ### Base 1.8  
 1.7 已经解决了并发问题，并且能支持 N 个 Segment 这么多次数的并发，但依然存在 HashMap 在 1.7 版本中的问题：查询遍历链表效率太低。因此 1.8 做了一些数据结构上的调整。
 
-![](https://user-gold-cdn.xitu.io/2018/7/23/164c47f3756eb206?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![](img/164c47f3756eb206.jpeg)
 
 其中抛弃了原有的 Segment 分段锁，而采用了 CAS + synchronized 来保证并发安全性。
 
@@ -725,7 +741,7 @@ public class CustomManager{
 | priority | 线程调度器会根据这个值来决定优先运行哪个线程（不保证），优先级的取值范围为 1~10，默认值是 5，可被继承。Thread 中定义了下面三个优先级常量：<br>- 最低优先级：MIN_PRIORITY = 1<br>- 默认优先级：NORM_PRIORITY = 5<br>- 最高优先级：MAX_PRIORITY = 10
 
 ## 状态
-![](https://pic2.zhimg.com/80/v2-326a2be9b86b1446d75b6f52f54c98fb_hd.jpg)
+![](img/v2-326a2be9b86b1446d75b6f52f54c98fb_hd.jpg)
 
 | 状态 | 说明 
 |--|--
@@ -761,7 +777,7 @@ public class CustomManager{
 # volatile
 当把变量声明为 volatile 类型后，编译器与运行时都会注意到这个变量是共享的，因此不会将该变量上的操作与其他内存操作一起重排序。volatile 变量不会被缓存在寄存器或者对其他处理器不可见的地方，JVM 保证了每次读变量都从内存中读，跳过 CPU cache 这一步，因此在读取 volatile 类型的变量时总会返回最新写入的值。
 
-![](https://user-gold-cdn.xitu.io/2019/6/23/16b833f4a48b216e?w=550&h=429&f=png&s=21448)
+![](img/16b833f4a48b216e.png)
 
 当一个变量定义为 volatile 之后，将具备以下特性：
 - 保证此变量对所有的线程的可见性，不能保证它具有原子性（可见性，是指线程之间的可见性，一个线程修改的状态对另一个线程是可见的）
@@ -777,6 +793,16 @@ AtomicInteger 中主要实现了整型的原子操作，防止并发情况下出
 
 Monitor 是线程私有的数据结构，每一个线程都有一个可用 monitor record 列表，同时还有一个全局的可用列表。每一个被锁住的对象都会和一个 monitor 关联，同时 monitor 中有一个 Owner 字段存放拥有该锁的线程的唯一标识，表示该锁被这个线程占用。Monitor 是依赖于底层的操作系统的 Mutex Lock（互斥锁）来实现的线程同步。
 
+synchronized是Java中的关键字，是一种同步锁。它修饰的对象有以下几种：
+1. 修饰一个代码块，被修饰的代码块称为同步语句块，其作用的范围是大括号{}括起来的代码，作用的对象是调用这个代码块的对象；
+2. 修饰一个方法，被修饰的方法称为同步方法，其作用的范围是整个方法，作用的对象是调用这个方法的对象；
+3. 修改一个静态的方法，其作用的范围是整个静态方法，作用的对象是这个类的所有对象；
+4. 修改一个类，其作用的范围是synchronized后面括号括起来的部分，作用主的对象是这个类的所有对象。
+
+使用类锁的方式有如下方式：
+1. 锁住类中的静态变量：因为静态变量和类信息一样也是存在方法区的并且整个 JVM 只有一份，所以加在静态变量上可以达到类锁的目的。
+2. 直接在静态方法上加 synchronized：因为静态方法同样也是存在方法区的并且整个 JVM 只有一份，所以加在静态方法上可以达到类锁的目的。
+3. 锁住 xxx.class：对当前类的 .class 属性加锁，可以实现类锁。
 
 ## 根据获取的锁分类
 **获取对象锁**
@@ -814,7 +840,7 @@ public interface Lock {
 
 
 ## 锁的分类
-![](https://user-gold-cdn.xitu.io/2019/6/18/16b69b50c9d340a5?w=1372&h=1206&f=png&s=142754)
+![](img/16b69b50c9d340a5.png)
 
 ### 悲观锁、乐观锁
 悲观锁认为自己在使用数据的时候一定有别的线程来修改数据，因此在获取数据的时候会先加锁，确保数据不会被别的线程修改。Java 中，synchronized 关键字和 Lock 的实现类都是悲观锁。悲观锁适合写操作多的场景，先加锁可以保证写操作时数据正确。

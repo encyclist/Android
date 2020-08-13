@@ -7,6 +7,7 @@
   - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f-1)
   - [与Activity通信](#%e4%b8%8eactivity%e9%80%9a%e4%bf%a1)
 - [Service](#service)
+  - [bindService启动服务的特点](#bindService启动服务的特点)
   - [启动过程](#%e5%90%af%e5%8a%a8%e8%bf%87%e7%a8%8b-1)
   - [绑定过程](#%e7%bb%91%e5%ae%9a%e8%bf%87%e7%a8%8b)
   - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f-2)
@@ -100,7 +101,7 @@
   - [内存泄漏](#%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f)
 # Activity
 ## 生命周期  
-![](http://gityuan.com/images/lifecycle/activity.png)
+![](img/activity.png)
 
 - Activity A 启动另一个Activity B，回调如下:  
 Activity A 的onPause() → Activity B的onCreate() → onStart() → onResume() → Activity A的onStop()；如果B是透明主题又或则是个DialogActivity，则不会回调A的onStop；
@@ -144,7 +145,7 @@ override fun onSaveInstanceState(outState: Bundle?) {
 | FLAG_ACTIVITY_CLEAR_TOP | 如果正在启动的 activity 已在当前 task中 运行，则不会启动该activity 的新实例，而是销毁其上的 activity，并调用其 onNewIntent() | -->
 
 ## 启动过程
-![](https://img-blog.csdn.net/20180427173504903)
+![](img/20180427173504903.jpeg)
 
 ``ActivityThread.java``
 ```java
@@ -225,7 +226,7 @@ private Activity performLaunchActivity(ActivityClientRecord r, Intent customInte
 - 只能在 Activity 保存其状态（用户离开 Activity）之前使用 commit() 提交事务。如果您试图在该时间点后提交，则会引发异常。 这是因为如需恢复 Activity，则提交后的状态可能会丢失。 对于丢失提交无关紧要的情况，请使用 commitAllowingStateLoss()。
 
 ## 生命周期  
-![](https://developer.android.google.cn/images/fragment_lifecycle.png)![](https://developer.android.google.cn/images/activity_fragment_lifecycle.png)  
+![](img/fragment_lifecycle.png)![](img/activity_fragment_lifecycle.png)  
 
 ## 与Activity通信
 执行此操作的一个好方法是，在片段内定义一个回调接口，并要求宿主 Activity 实现它。
@@ -259,7 +260,14 @@ public static class FragmentA extends ListFragment {
 Service 分为两种工作状态，一种是启动状态，主要用于执行后台计算；另一种是绑定状态，主要用于其他组件和 Service 的交互。
 
 ## 启动过程
-![](http://gityuan.com/images/android-service/am/Seq_start_service.png)
+![](img/Seq_start_service.png)
+
+## bindService启动服务的特点
+相比于用startService启动的Service，bindService启动的服务具有如下特点:
+1. bindService启动的服务在调用者和服务之间是典型的client-server的接口，即调用者是客户端，service是服务端，service就一个，但是连接绑定到service上面的客户端client可以是一个或多个。这里特别要说明的是，这里所提到的client指的是组件，比如某个Activity。
+2. 客户端client（即调用bindService的一方，比如某个Activity）可以通过IBinder接口获取Service的实例，从而可以实现在client端直接调用Service中的方法以实现灵活的交互，并且可借助IBinder实现跨进程的client-server的交互，这在纯startService启动的Service中是无法实现的。
+3. 不同于startService启动的服务默认无限期执行（可以通过Context的stopService或Service的stopSelf方法停止运行），bindService启动的服务的生命周期与其绑定的client息息相关。当client销毁的时候，client会自动与Service解除绑定，当然client也可以通过明确调用Context的unbindService方法与Service解除绑定。当没有任何client与Service绑定的时候，Service会自行销毁（通过startService启动的除外）。
+4. startService和bindService二者执行的回调方法不同：startService启动的服务会涉及Service的的onStartCommand回调方法，而通过bindService启动的服务会涉及Service的onBind、onUnbind等回调方法。
 
 ``ActivityThread.java``
 ```java
@@ -299,7 +307,7 @@ private void handleCreateService(CreateServiceData data) {
 ```
 
 ## 绑定过程
-![](http://gityuan.com/images/ams/bind_service.jpg)
+![](img/bind_service.jpg)
 
 ``ActivityThread.java``
 ```java
@@ -330,7 +338,7 @@ private void handleBindService(BindServiceData data) {
 ```
 
 ## 生命周期
-![](https://upload-images.jianshu.io/upload_images/944365-cf5c1a9d2dddaaca.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/456/format/webp)
+![](img/944365-cf5c1a9d2dddaaca.webp)
 | 值 | 说明 |
 |-----|-----|
 | START_NOT_STICKY | 如果系统在 onStartCommand() 返回后终止服务，则除非有挂起 Intent 要传递，否则系统不会重建服务。这是最安全的选项，可以避免在不必要时以及应用能够轻松重启所有未完成的作业时运行服务 |
@@ -359,7 +367,7 @@ LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(receiver, 
 ```
 
 ## 注册过程
-![](http://gityuan.com/images/ams/send_broadcast.jpg)
+![](img/send_broadcast.jpg)
 
 
 # ContentProvider
@@ -432,7 +440,7 @@ public class Installer extends ContentProvider {
 | SQLite 数据库 | 在私有数据库中存储结构化数据 |
 
 # View
-![](https://user-gold-cdn.xitu.io/2019/6/12/16b4a8a388f3a91a?imageslim)
+![](img/16b4a8a388f3a91a.jpeg)
 ViewRoot 对应于 ViewRootImpl 类，它是连接 WindowManager 和 DecorView 的纽带，View 的三大流程均是通过 ViewRoot 来完成的。在 ActivityThread 中，当 Activity 对象被创建完毕后，会将 DecorView 添加到 Window 中，同时会创建 ViewRootImpl 对象，并将 ViewRootImpl 对象和 DecorView 建立关联
 
 View 的整个绘制流程可以分为以下三个阶段：
@@ -440,7 +448,7 @@ View 的整个绘制流程可以分为以下三个阶段：
 - layout: 判断是否需要重新计算 View 的位置，需要的话则计算
 - draw: 判断是否需要重新绘制 View，需要的话则重绘制
 
-![](https://img-blog.csdn.net/20180510164327114)
+![](img/20180510164327114.jpeg)
 
 ## MeasureSpec
 MeasureSpec表示的是一个32位的整形值，它的高2位表示测量模式SpecMode，低30位表示某种测量模式下的规格大小SpecSize。MeasureSpec 是 View 类的一个静态内部类，用来说明应该如何测量这个 View
@@ -615,9 +623,9 @@ view.requestLayout();
 ## View 的事件分发
 点击事件达到顶级 View(一般是一个 ViewGroup)，会调用 ViewGroup 的 dispatchTouchEvent 方法，如果顶级 ViewGroup 拦截事件即 onInterceptTouchEvent 返回 true，则事件由 ViewGroup 处理，这时如果 ViewGroup 的 mOnTouchListener 被设置，则 onTouch 会被调用，否则 onTouchEvent 会被调用。也就是说如果都提供的话，onTouch 会屏蔽掉 onTouchEvent。在 onTouchEvent 中，如果设置了 mOnClickListenser，则 onClick 会被调用。如果顶级 ViewGroup 不拦截事件，则事件会传递给它所在的点击事件链上的子 View，这时子 View 的 dispatchTouchEvent 会被调用。如此循环。
 
-![](https://user-gold-cdn.xitu.io/2019/7/19/16c08654e36be140?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![](img/16c08654e36be140.webp)
 
-![](https://user-gold-cdn.xitu.io/2019/7/19/16c086493dc70018?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![](img/16c086493dc70018.webp)
 
 - ViewGroup 默认不拦截任何事件。ViewGroup 的 onInterceptTouchEvent 方法默认返回 false。
 
@@ -810,7 +818,7 @@ public class MyApplication extends Application {
 | NATIVE_ADJ | -17 | native进程（不被系统管理）
 
 ### 进程被杀情况
-![](https://pic3.zhimg.com/80/18b6bfb1bf54433619a7122c3a8e606e_hd.png)
+![](img/18b6bfb1bf54433619a7122c3a8e606e_hd.png)
 
 ### 进程保活方案
 - 开启一个像素的 Activity
@@ -1399,7 +1407,7 @@ private void scheduleTimeoutLocked(ToastRecord r, boolean immediate)
 ```
 
 # Bitmap
-![](https://upload-images.jianshu.io/upload_images/2618044-cd996dd172cce293.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp)
+![](img/2618044-cd996dd172cce293.webp)
 
 ## 配置信息与压缩方式
 **Bitmap 中有两个内部枚举类：**
@@ -1509,7 +1517,7 @@ public static Bitmap compressImage(Bitmap image) {
 
 ## BitmapFactory
 ### Bitmap创建流程
-![](https://upload-images.jianshu.io/upload_images/2618044-9c2046ca5054da05.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp)
+![](img/2618044-9c2046ca5054da05.webp)
 
 
 ### Option类
@@ -1655,7 +1663,7 @@ Android P 中 WindowManager.LayoutParams 新增了一个布局参数属性 layou
 # Context
 Context 本身是一个抽象类，是对一系列系统服务接口的封装，包括：内部资源、包、类加载、I/O操作、权限、主线程、IPC 和组件启动等操作的管理。ContextImpl, Activity, Service, Application 这些都是 Context 的直接或间接子类, 关系如下:
 
-![](http://gityuan.com/images/context/context.jpg)
+![](img/context.jpg)
 
 ContextWrapper是代理Context的实现，简单地将其所有调用委托给另一个Context（mBase）。
 
@@ -1722,7 +1730,7 @@ class ContextImpl extends Context {
 ```
 
 ## 架构
-![](http://gityuan.com/images/sp/shared_preference.jpg)
+![](img/shared_preference.jpg)
 
 SharedPreferences 与 Editor 只是两个接口. SharedPreferencesImpl 和 EditorImpl 分别实现了对应接口。另外, ContextImpl 记录着 SharedPreferences 的重要数据。
 
@@ -1975,7 +1983,7 @@ loop 方法是一个死循环，唯一跳出循环的方式是 MessageQueue 的 
 ### Handler
 Handler 的工作主要包含消息的发送和接收的过程。消息的发送可以通过 post/send 的一系列方法实现，post 最终也是通过send来实现的。
 
-![](https://img-blog.csdnimg.cn/20181220142659447)
+![](img/20181220142659447.jpeg)
 
 # 线程异步
 应用启动时，系统会为应用创建一个名为“主线程”的执行线程( UI 线程)。 此线程非常重要，因为它负责将事件分派给相应的用户界面小部件，其中包括绘图事件。 此外，它也是应用与 Android UI 工具包组件（来自 ``android.widget`` 和 ``android.view`` 软件包的组件）进行交互的线程。
@@ -2693,7 +2701,7 @@ mWebview.setWebViewClient(new WebViewClient() {   
 
 - 脚本执行慢，可以把框架代码拆分出来，在请求页面之前就执行好。
   
-![](https://awps-assets.meituan.net/mit-x/blog-images-bundle-2017/9a2f8beb.png)
+![](img/9a2f8beb.png)
 
 ## 内存泄漏
 直接 new WebView 并传入 application context 代替在 XML 里面声明以防止 activity 引用被滥用，能解决90+%的 WebView 内存泄漏。

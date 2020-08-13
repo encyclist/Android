@@ -15,7 +15,6 @@
   - [基本流程](#%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b)
   - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b)
 - [Proguard](#proguard)
-  - [公共模板](#%e5%85%ac%e5%85%b1%e6%a8%a1%e6%9d%bf)
   - [常用的自定义混淆规则](#%e5%b8%b8%e7%94%a8%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e6%b7%b7%e6%b7%86%e8%a7%84%e5%88%99)
   - [aar中增加独立的混淆配置](#aar%e4%b8%ad%e5%a2%9e%e5%8a%a0%e7%8b%ac%e7%ab%8b%e7%9a%84%e6%b7%b7%e6%b7%86%e9%85%8d%e7%bd%ae)
   - [检查混淆和追踪异常](#%e6%a3%80%e6%9f%a5%e6%b7%b7%e6%b7%86%e5%92%8c%e8%bf%bd%e8%b8%aa%e5%bc%82%e5%b8%b8)
@@ -39,6 +38,8 @@
 - [类加载器](#%e7%b1%bb%e5%8a%a0%e8%bd%bd%e5%99%a8)
   - [双亲委托模式](#%e5%8f%8c%e4%ba%b2%e5%a7%94%e6%89%98%e6%a8%a1%e5%bc%8f)
   - [DexPathList](#dexpathlist)
+  - [三种ClassLoader](#三种ClassLoader)
+- [热修复原理](#热修复原理)
 # ART
 ART 代表 Android Runtime，其处理应用程序执行的方式完全不同于 Dalvik，Dalvik 是依靠一个 Just-In-Time (JIT) 编译器去解释字节码。开发者编译后的应用代码需要通过一个解释器在用户的设备上运行，这一机制并不高效，但让应用能更容易在不同硬件和架构上运 行。ART 则完全改变了这套做法，在应用安装时就预编译字节码到机器语言，这一机制叫 Ahead-Of-Time (AOT）编译。在移除解释代码这一过程后，应用程序执行将更有效率，启动更快。
 
@@ -219,154 +220,6 @@ Proguard 具有以下三个功能：
 - 优化（Optimize） : 分析和优化Java字节码
 - 混淆（Obfuscate）: 使用简短的无意义的名称，对类，字段和方法进行重命名
 
-## 公共模板
-```
-#############################################
-#
-# 对于一些基本指令的添加
-#
-#############################################
-# 代码混淆压缩比，在 0~7 之间，默认为 5，一般不做修改
--optimizationpasses 5
-
-# 混合时不使用大小写混合，混合后的类名为小写
--dontusemixedcaseclassnames
-
-# 指定不去忽略非公共库的类
--dontskipnonpubliclibraryclasses
-
-# 这句话能够使我们的项目混淆后产生映射文件
-# 包含有类名->混淆后类名的映射关系
--verbose
-
-# 指定不去忽略非公共库的类成员
--dontskipnonpubliclibraryclassmembers
-
-# 不做预校验，preverify 是 proguard 的四个步骤之一，Android 不需要 preverify，去掉这一步能够加快混淆速度。
--dontpreverify
-
-# 保留 Annotation 不混淆
--keepattributes *Annotation*,InnerClasses
-
-# 避免混淆泛型
--keepattributes Signature
-
-# 抛出异常时保留代码行号
--keepattributes SourceFile,LineNumberTable
-
-# 指定混淆是采用的算法，后面的参数是一个过滤器
-# 这个过滤器是谷歌推荐的算法，一般不做更改
--optimizations !code/simplification/cast,!field/*,!class/merging/*
-
-
-#############################################
-#
-# Android开发中一些需要保留的公共部分
-#
-#############################################
-
-# 保留我们使用的四大组件，自定义的 Application 等等这些类不被混淆
-# 因为这些子类都有可能被外部调用
--keep public class * extends android.app.Activity
--keep public class * extends android.app.Appliction
--keep public class * extends android.app.Service
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.content.ContentProvider
--keep public class * extends android.app.backup.BackupAgentHelper
--keep public class * extends android.preference.Preference
--keep public class * extends android.view.View
--keep public class com.android.vending.licensing.ILicensingService
-
-
-# 保留 support 下的所有类及其内部类
--keep class android.support.** { *; }
-
-# 保留继承的
--keep public class * extends android.support.v4.**
--keep public class * extends android.support.v7.**
--keep public class * extends android.support.annotation.**
-
-# 保留 R 下面的资源
--keep class **.R$* { *; }
-
-# 保留本地 native 方法不被混淆
--keepclasseswithmembernames class * {
-    native <methods>;
-}
-
-# 保留在 Activity 中的方法参数是view的方法，
-# 这样以来我们在 layout 中写的 onClick 就不会被影响
--keepclassmembers class * extends android.app.Activity {
-    public void *(android.view.View);
-}
-
-# 保留枚举类不被混淆
--keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
-
-# 保留我们自定义控件（继承自 View）不被混淆
--keep public class * extends android.view.View {
-    *** get*();
-    void set*(***);
-    public <init>(android.content.Context);
-    public <init>(android.content.Context, android.util.AttributeSet);
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
-
-# 保留 Parcelable 序列化类不被混淆
--keep class * implements android.os.Parcelable {
-    public static final android.os.Parcelable$Creator *;
-}
-
-# 保留 Serializable 序列化的类不被混淆
--keepnames class * implements java.io.Serializable
--keepclassmembers class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    !static !transient <fields>;
-    !private <fields>;
-    !private <methods>;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-}
-
-# 对于带有回调函数的 onXXEvent、**On*Listener 的，不能被混淆
--keepclassmembers class * {
-    void *(**On*Event);
-    void *(**On*Listener);
-}
-
-# webView 处理，项目中没有使用到 webView 忽略即可
--keepclassmembers class fqcn.of.javascript.interface.for.webview {
-    public *;
-}
--keepclassmembers class * extends android.webkit.webViewClient {
-    public void *(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
-    public boolean *(android.webkit.WebView, java.lang.String);
-}
--keepclassmembers class * extends android.webkit.webViewClient {
-    public void *(android.webkit.webView, java.lang.String);
-}
-
-# js
--keepattributes JavascriptInterface
--keep class android.webkit.JavascriptInterface { *; }
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
-
-# @Keep
--keep,allowobfuscation @interface android.support.annotation.Keep
--keep @android.support.annotation.Keep class *
--keepclassmembers class * {
-    @android.support.annotation.Keep *;
-}
-```
-
 ##  常用的自定义混淆规则
 ```xml
 # 通配符*，匹配任意长度字符，但不含包名分隔符(.)
@@ -435,15 +288,15 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 
 # 架构
 ## MVC
-![](https://mmbiz.qpic.cn/mmbiz_png/zKFJDM5V3Wy5xbLTp6JMMdouZiavFxyYCwLhGyLdicyLzgUDKFTZVt1OgU6iaSx2IUwnygzmQzW7Renaa8hmQ62cQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/2.webp)
 
 在 Android 中，三者的关系如下：
 
-![](https://mmbiz.qpic.cn/mmbiz_png/zKFJDM5V3Wy5xbLTp6JMMdouZiavFxyYCicNvEVMO9vDgukUR29Z1DCacZJwmmH1EEb7gUOZmDxolWexP01O8jfg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/3.webp)
 
 由于在 Android 中 xml 布局的功能性太弱，所以 Activity 承担了绝大部分的工作，所以在 Android 中 mvc 更像：
 
-![](https://mmbiz.qpic.cn/mmbiz_png/zKFJDM5V3Wy5xbLTp6JMMdouZiavFxyYCOq89MLQX4UM3dgBTQfU72desHb1XbOWRQZINnXOCCdZCuicUiaTHhtEg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/4.webp)
 
 总结：
 - 具有一定的分层，model 解耦，controller 和 view 并没有解耦
@@ -461,7 +314,7 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 - 更容易单元测试
 
 ## MVVM
-![](https://mmbiz.qpic.cn/mmbiz_png/zKFJDM5V3Wy5xbLTp6JMMdouZiavFxyYCMygIDD6xo5djkq6Y3jZo53sT2A4kKNaz8JEVRwmUnTmcAwJm0pZVWg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/5.webp)
 
 在 MVP 中 View 和 Presenter 要相互持有，方便调用对方，而在 MVP 中 View 和 ViewModel 通过 Binding 进行关联，他们之前的关联处理通过  DataBinding 完成。
 
@@ -472,7 +325,7 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 
 # Jetpack
 ## 架构
-![](https://developer.android.google.cn/topic/libraries/architecture/images/final-architecture.png)
+![](img/final-architecture.png)
 
 ## 使用示例
 ``build.gradle``
@@ -994,7 +847,7 @@ target_link_libraries( # Specifies the target library.
 | ···
 
 # 类加载器
-![](https://img-blog.csdn.net/20161021101447117?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+![](img/20161021101447117.png)
 
 ## 双亲委托模式
 某个特定的类加载器在接到加载类的请求时，首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。
@@ -1003,6 +856,16 @@ target_link_libraries( # Specifies the target library.
 
 ## DexPathList
 DexClassLoader 重载了 ``findClass`` 方法，在加载类时会调用其内部的 DexPathList 去加载。DexPathList 是在构造 DexClassLoader 时生成的，其内部包含了 DexFile。
+
+## 三种ClassLoader
+Java中的ClassLoader是加载class文件，而Android中的虚拟机无论是dvm还是art都只能识别dex文件。因此Java中的ClassLoader在Android中不适用。Android中的`java.lang.ClassLoader`这个类也不同于Java中的`java.lang.ClassLoader`。
+Android中的ClassLoader类型也可分为系统ClassLoader和自定义ClassLoader。其中系统ClassLoader包括3种分别是：
+
+`BootClassLoader`，Android系统启动时会使用BootClassLoader来预加载常用类，与Java中的Bootstrap ClassLoader不同的是，它并不是由C/C++代码实现，而是由Java实现的。BootClassLoader是ClassLoader的一个内部类。
+
+`PathClassLoader`，全名是`dalvik/system.PathClassLoader`，可以加载已经安装的Apk，也就是/data/app/package 下的apk文件，也可以加载/vendor/lib, /system/lib下的nativeLibrary。
+
+`DexClassLoader`，全名是`dalvik/system.DexClassLoader`，可以加载一个未安装的apk文件。
 
 ``DexPathList.java``
 ```java
@@ -1022,3 +885,7 @@ public Class findClass(String name) {
 ···
 ```
 
+# 热修复原理
+最终是通过遍历`DexPathList`的`dexElements`数组进行类的查找加载，当找到类就返回；
+
+`dexElements`数组的每个元素都代表着一个dex文件，所以为了让补丁包中要替换的类抢先于有bug的类被加载，就需要将补丁包dex插入到dexElements数组的头部。
