@@ -11,6 +11,9 @@
   - [代码优化](#%e4%bb%a3%e7%a0%81%e4%bc%98%e5%8c%96)
   - [.arsc文件优化](#arsc%e6%96%87%e4%bb%b6%e4%bc%98%e5%8c%96)
   - [lib目录优化](#lib%e7%9b%ae%e5%bd%95%e4%bc%98%e5%8c%96)
+- [签名机制](#签名机制)
+  - [V1](#V1)
+  - [V2](#V2)
 - [Hook](#hook)
   - [基本流程](#%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b)
   - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b)
@@ -22,7 +25,7 @@
   - [MVC](#mvc)
   - [MVP](#mvp)
   - [MVVM](#mvvm)
-- [Jetpack](#jetpack)
+- [DataBinding](#DataBinding)
   - [架构](#%e6%9e%b6%e6%9e%84-1)
   - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b-1)
 - [NDK 开发](#ndk-%e5%bc%80%e5%8f%91)
@@ -40,6 +43,10 @@
   - [DexPathList](#dexpathlist)
   - [三种ClassLoader](#三种ClassLoader)
 - [热修复原理](#热修复原理)
+- [多渠道打包](#多渠道打包)
+- [JetPack](#JetPack)
+- [RxJava/RxAndroid](#RxJava/RxAndroid)
+  - [在安卓中使用](#在安卓中使用)
 # ART
 ART 代表 Android Runtime，其处理应用程序执行的方式完全不同于 Dalvik，Dalvik 是依靠一个 Just-In-Time (JIT) 编译器去解释字节码。开发者编译后的应用代码需要通过一个解释器在用户的设备上运行，这一机制并不高效，但让应用能更容易在不同硬件和架构上运 行。ART 则完全改变了这套做法，在应用安装时就预编译字节码到机器语言，这一机制叫 Ahead-Of-Time (AOT）编译。在移除解释代码这一过程后，应用程序执行将更有效率，启动更快。
 
@@ -145,6 +152,33 @@ android {
     }
 }
 ```
+
+# 签名机制
+[详见](https://blog.csdn.net/freekiteyu/article/details/84849651)
+
+使用RSA加密方式
+* 公钥加密，私钥解密的过程，称为“加密”。公钥加密后只有私钥持有者才能解密
+* 私钥加密，公钥解密的过程，称为“签名”。任何持有公钥的人都能解密，却导致加密者不能否认，因为公钥能解密则说明一定是私钥加密的
+## V1
+
+### 签名过程：
+1. MANIFEST.MF：保存每个文件的SHA值BASE64后的结果
+2. CERT.SF：对MANIFEST.MF的头部、整个文件、条目再进行一次SHA后的BASE64计算
+3. CERT.RSA对CERT.SF用私钥签名，并将公钥一同写入该文件
+4. 将保存至META-INF文件夹中（META-INF文件夹不参与运算）
+### 校验过程：
+1. 检查 APK 中包含的所有文件，对应的摘要值与 MANIFEST.MF 文件中记录的值一致。
+2. 使用证书文件（RSA 文件）检验签名文件（SF 文件）没有被修改过。
+3. 使用签名文件（SF 文件）检验 MF 文件没有被修改过。
+### 存在的问题：
+* 慢，文件多所以慢
+* 不安全，因为META-INF文件夹不参与运算，一些快速批量打包方案就选择在这个目录中添加渠道文件
+
+
+## V2
+从Android7.0开始
+
+就是把 APK 按照 1M 大小分割，分别计算这些分段的摘要，最后把这些分段的摘要在进行计算得到最终的摘要也就是 APK 的摘要。然后将 APK 的摘要 + 数字证书 + 其他属性生成签名数据写入到 APK Signing Block 区块。
 
 # Hook
 ## 基本流程
@@ -323,7 +357,7 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 - 视图状态较多，ViewModel 的构建和维护的成本都会比较高
 - 但是由于数据和视图的双向绑定，导致出现问题时不太好定位来源
 
-# Jetpack
+# DataBinding
 ## 架构
 ![](img/final-architecture.png)
 
@@ -889,3 +923,158 @@ public Class findClass(String name) {
 最终是通过遍历`DexPathList`的`dexElements`数组进行类的查找加载，当找到类就返回；
 
 `dexElements`数组的每个元素都代表着一个dex文件，所以为了让补丁包中要替换的类抢先于有bug的类被加载，就需要将补丁包dex插入到dexElements数组的头部。
+
+# 多渠道打包
+AndroidManifest中添加渠道标识
+```
+<meta-data
+    android:name="CHANNEL_ID"
+    android:value="${CHANNEL_VALUE}" />
+```
+定义所有渠道
+```
+flavorDimensions "official","test"
+```
+配置渠道
+```
+productFlavors {
+    // 官方渠道
+    "official" {
+        dimension "official"
+        //渠道标识
+        manifestPlaceholders = [CHANNEL_VALUE: "1000"]
+    }
+}
+```
+对不同的渠道使用不同的签名
+```
+signingConfigs {
+    official {
+        storeFile file('./official.jks')
+        storePassword '123456'
+        keyAlias 'key0'
+        keyPassword '123456'
+    }
+}
+```
+获取渠道号
+```java
+ApplicationInfo appInfo = null;
+String channelIdStr = "";
+try {
+    appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+    Object channelId = appInfo.metaData.get("CHANNEL_ID");
+    channelIdStr = TextUtils.isEmpty(channelId.toString()) ? "1000" : channelId.toString();
+} catch (PackageManager.NameNotFoundException e) {
+    channelIdStr = "1000";
+    e.printStackTrace();
+}
+```
+
+# JetPack
+旨在提供兼容并规范的代码库
+
+AndroidX、CameraX 均属于属于JetPack
+
+# RxJava/RxAndroid
+RxJava使用的是观察者模式，其中有两个关键的接口：Observable 和 Observer，当Observable（被观察的对象）状态改变，所有subscribed（订阅）的Observer（观察者）会收到一个通知。
+
+在Observable的接口中有一个方法 subscribe() ，这样Observer 可以调用来进行订阅。
+同样，在Observer 接口中有三个方法，会被Observable 回调：
+
+* onNext(T value) 提供了一个 T 类型的item给Observer
+* onComplete() 在Observable发送items结束后通知Observer
+* onError(Throwable e) 当Observable发生错误时通知Observer
+
+## 在安卓中使用
+使用`compose`来添加一个调度转换器
+* unsubscribeOn(Schedulers.io()) // 指定取消订阅的调度器
+* subscribeOn(Schedulers.io()) // 指定上游发送事件的调度器(只有第一次指定有效)
+* observeOn(AndroidSchedulers.mainThread()) // 指定下游接收事件的调度器(每次指定都有效)
+* onErrorResumeNext() // 指定异常处理器
+```java
+public abstract class BaseObserver<T> extends AtomicReference<Disposable> implements Observer<T>, Disposable {
+
+    @Override
+    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
+        if (DisposableHelper.setOnce(this, d)) {
+            try {
+                onStart();
+            } catch (Throwable ex) {
+                Exceptions.throwIfFatal(ex);
+                d.dispose();
+                onError(ex);
+            }
+        }
+    }
+
+    @Override
+    public void onNext(@io.reactivex.annotations.NonNull T t) {
+        if (!isDisposed()) {
+            try {
+                doOnNext(t);
+            } catch (Throwable e) {
+                Exceptions.throwIfFatal(e);
+                get().dispose();
+                onError(e);
+            }
+        }
+    }
+
+    @Override
+    public void onError(@io.reactivex.annotations.NonNull Throwable t) {
+        if (!isDisposed()) {
+            lazySet(DisposableHelper.DISPOSED);
+            try {
+                onStop();
+                if (t != null) {
+                    doOnError(t);
+                }
+            } catch (Throwable e) {
+                Exceptions.throwIfFatal(e);
+                RxJavaPlugins.onError(new CompositeException(t, e));
+            }
+        } else {
+            RxJavaPlugins.onError(t);
+        }
+    }
+
+    @Override
+    public void onComplete() {
+        if (!isDisposed()) {
+            lazySet(DisposableHelper.DISPOSED);
+            try {
+                onStop();
+            } catch (Throwable e) {
+                Exceptions.throwIfFatal(e);
+                RxJavaPlugins.onError(e);
+            }
+        }
+    }
+
+    @Override
+    public void dispose() {
+        DisposableHelper.dispose(this);
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return get() == DisposableHelper.DISPOSED;
+    }
+
+    public boolean disposable(@NonNull CompositeDisposable disposable) {
+        return disposable.add(this);
+    }
+
+    protected void onStart() {
+    }
+
+    protected void onStop() {
+    }
+
+    protected abstract void doOnNext(@NonNull T t);
+
+    protected abstract void doOnError(@NonNull Throwable t);
+
+}
+```

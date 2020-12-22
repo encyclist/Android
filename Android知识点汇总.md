@@ -12,6 +12,7 @@
   - [绑定过程](#%e7%bb%91%e5%ae%9a%e8%bf%87%e7%a8%8b)
   - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f-2)
   - [启用前台服务](#%e5%90%af%e7%94%a8%e5%89%8d%e5%8f%b0%e6%9c%8d%e5%8a%a1)
+  - [JobService/JobIntentService](#JobService/JobIntentService)
 - [BroadcastReceiver](#broadcastreceiver)
   - [注册过程](#%e6%b3%a8%e5%86%8c%e8%bf%87%e7%a8%8b)
 - [ContentProvider](#contentprovider)
@@ -356,6 +357,10 @@ PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationInt
 notification.setLatestEventInfo(this, title, mmessage, pendingIntent);
 startForeground(ONGOING_NOTIFICATION_ID, notification);
 ```
+## JobService/JobIntentService
+JobService与JobIntentService相比 JobService使用的handler使用的是主线程的Looper，因此需要在onStartJob（）中手动创建AsyncTask去执行耗时任务，而JobIntentService则帮我们处理这一过程，使用它只需要写需要做的任务逻辑即可，不用关心卡住主线程的问题。另外，向jobScheduler传递任务操作也更简单了，不需要在指定JobInfo中的参数，直接enqueue(context,intent)就可以。
+
+JobIntentService通过`enqueueWork`启动，通过`onHandleWork`处理工作内容
 
 # BroadcastReceiver
 target 26 之后，无法在 AndroidManifest 显示声明大部分广播，除了一部分必要的广播，如：
