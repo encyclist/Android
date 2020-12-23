@@ -1,52 +1,53 @@
+<!-- TOC -->
+
 - [ART](#art)
-  - [ART 功能](#art-%e5%8a%9f%e8%83%bd)
-    - [预先 (AOT) 编译](#%e9%a2%84%e5%85%88-aot-%e7%bc%96%e8%af%91)
-    - [垃圾回收优化](#%e5%9e%83%e5%9c%be%e5%9b%9e%e6%94%b6%e4%bc%98%e5%8c%96)
-    - [开发和调试方面的优化](#%e5%bc%80%e5%8f%91%e5%92%8c%e8%b0%83%e8%af%95%e6%96%b9%e9%9d%a2%e7%9a%84%e4%bc%98%e5%8c%96)
-  - [ART GC](#art-gc)
-- [Apk 包体优化](#apk-%e5%8c%85%e4%bd%93%e4%bc%98%e5%8c%96)
-  - [Apk 组成结构](#apk-%e7%bb%84%e6%88%90%e7%bb%93%e6%9e%84)
-  - [整体优化](#%e6%95%b4%e4%bd%93%e4%bc%98%e5%8c%96)
-  - [资源优化](#%e8%b5%84%e6%ba%90%e4%bc%98%e5%8c%96)
-  - [代码优化](#%e4%bb%a3%e7%a0%81%e4%bc%98%e5%8c%96)
-  - [.arsc文件优化](#arsc%e6%96%87%e4%bb%b6%e4%bc%98%e5%8c%96)
-  - [lib目录优化](#lib%e7%9b%ae%e5%bd%95%e4%bc%98%e5%8c%96)
+    - [ART 功能](#art-功能)
+    - [ART GC](#art-gc)
+- [Apk 包体优化](#apk-包体优化)
+    - [Apk 组成结构](#apk-组成结构)
+    - [整体优化](#整体优化)
+    - [资源优化](#资源优化)
+    - [代码优化](#代码优化)
+    - [.arsc文件优化](#arsc文件优化)
+    - [lib目录优化](#lib目录优化)
 - [签名机制](#签名机制)
-  - [V1](#V1)
-  - [V2](#V2)
+    - [V1](#v1)
+    - [V2](#v2)
 - [Hook](#hook)
-  - [基本流程](#%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b)
-  - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b)
+    - [基本流程](#基本流程)
+    - [使用示例](#使用示例)
 - [Proguard](#proguard)
-  - [常用的自定义混淆规则](#%e5%b8%b8%e7%94%a8%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e6%b7%b7%e6%b7%86%e8%a7%84%e5%88%99)
-  - [aar中增加独立的混淆配置](#aar%e4%b8%ad%e5%a2%9e%e5%8a%a0%e7%8b%ac%e7%ab%8b%e7%9a%84%e6%b7%b7%e6%b7%86%e9%85%8d%e7%bd%ae)
-  - [检查混淆和追踪异常](#%e6%a3%80%e6%9f%a5%e6%b7%b7%e6%b7%86%e5%92%8c%e8%bf%bd%e8%b8%aa%e5%bc%82%e5%b8%b8)
-- [架构](#%e6%9e%b6%e6%9e%84)
-  - [MVC](#mvc)
-  - [MVP](#mvp)
-  - [MVVM](#mvvm)
-- [DataBinding](#DataBinding)
-  - [架构](#%e6%9e%b6%e6%9e%84-1)
-  - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b-1)
-- [NDK 开发](#ndk-%e5%bc%80%e5%8f%91)
-  - [JNI 基础](#jni-%e5%9f%ba%e7%a1%80)
-    - [数据类型](#%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b)
-    - [String 字符串函数操作](#string-%e5%ad%97%e7%ac%a6%e4%b8%b2%e5%87%bd%e6%95%b0%e6%93%8d%e4%bd%9c)
-    - [常用 JNI 访问 Java 对象方法](#%e5%b8%b8%e7%94%a8-jni-%e8%ae%bf%e9%97%ae-java-%e5%af%b9%e8%b1%a1%e6%96%b9%e6%b3%95)
-  - [NDK 开发](#ndk-%e5%bc%80%e5%8f%91-1)
-    - [基础开发流程](#%e5%9f%ba%e7%a1%80%e5%bc%80%e5%8f%91%e6%b5%81%e7%a8%8b)
-    - [System.loadLibrary()](#systemloadlibrary)
-  - [CMake 构建 NDK 项目](#cmake-%e6%9e%84%e5%bb%ba-ndk-%e9%a1%b9%e7%9b%ae)
-  - [常用的 Android NDK 原生 API](#%e5%b8%b8%e7%94%a8%e7%9a%84-android-ndk-%e5%8e%9f%e7%94%9f-api)
-- [类加载器](#%e7%b1%bb%e5%8a%a0%e8%bd%bd%e5%99%a8)
-  - [双亲委托模式](#%e5%8f%8c%e4%ba%b2%e5%a7%94%e6%89%98%e6%a8%a1%e5%bc%8f)
-  - [DexPathList](#dexpathlist)
-  - [三种ClassLoader](#三种ClassLoader)
+    - [常用的自定义混淆规则](#常用的自定义混淆规则)
+    - [aar中增加独立的混淆配置](#aar中增加独立的混淆配置)
+    - [检查混淆和追踪异常](#检查混淆和追踪异常)
+- [架构](#架构)
+    - [MVC](#mvc)
+    - [MVP](#mvp)
+    - [MVVM](#mvvm)
+- [DataBinding](#databinding)
+    - [布局绑定原理](#布局绑定原理)
+    - [架构](#架构)
+    - [V和VM绑定](#V和VM绑定)
+    - [VM回调通知V](#VM回调通知V)
+- [NDK 开发](#ndk-开发)
+    - [JNI 基础](#jni-基础)
+    - [NDK 开发](#ndk-开发)
+    - [CMake 构建 NDK 项目](#cmake-构建-ndk-项目)
+    - [常用的 Android NDK 原生 API](#常用的-android-ndk-原生-api)
+- [类加载器](#类加载器)
+    - [双亲委托模式](#双亲委托模式)
+    - [DexPathList](#dexpathlist)
+    - [三种ClassLoader](#三种classloader)
 - [热修复原理](#热修复原理)
 - [多渠道打包](#多渠道打包)
-- [JetPack](#JetPack)
-- [RxJava/RxAndroid](#RxJava/RxAndroid)
-  - [在安卓中使用](#在安卓中使用)
+    - [官方方式](#官方方式)
+    - [美团原理](#美团原理)
+- [JetPack](#jetpack)
+- [RxJava/RxAndroid](#rxjavarxandroid)
+    - [在安卓中使用](#在安卓中使用)
+
+<!-- /TOC -->
+
 # ART
 ART 代表 Android Runtime，其处理应用程序执行的方式完全不同于 Dalvik，Dalvik 是依靠一个 Just-In-Time (JIT) 编译器去解释字节码。开发者编译后的应用代码需要通过一个解释器在用户的设备上运行，这一机制并不高效，但让应用能更容易在不同硬件和架构上运 行。ART 则完全改变了这套做法，在应用安装时就预编译字节码到机器语言，这一机制叫 Ahead-Of-Time (AOT）编译。在移除解释代码这一过程后，应用程序执行将更有效率，启动更快。
 
@@ -338,7 +339,7 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 - 易于理解、开发速度快、可维护性高
 
 ## MVP
-![](https://mmbiz.qpic.cn/mmbiz_png/zKFJDM5V3Wy5xbLTp6JMMdouZiavFxyYCLVgibsuVQFguBI8FBdZibLNfpvbpd6njkdGWdyR2UL6TzMOhKHFqLC0Q/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![](img/sadfghtrthdx.webp)
 
 通过引入接口 BaseView，让相应的视图组件如 Activity，Fragment去实现 BaseView，把业务逻辑放在 presenter 层中，弱化 Model 只有跟 view 相关的操作都由 View 层去完成。
 
@@ -358,139 +359,30 @@ retrace.bat|retrace.sh [-verbose] mapping.txt [<stacktrace_file>]
 - 但是由于数据和视图的双向绑定，导致出现问题时不太好定位来源
 
 # DataBinding
+[详情](https://www.jianshu.com/p/c4f5411cb0ae)
+
+## 布局绑定原理
+DataBinding只是对原有API的封装。
+在编译时对跟布局增加了`layout/文件名驼峰命名_0`每个使用了绑定的View增加一个`android:tag="binding_1"`
+
+初始化View时会检查跟布局的tag是否是固定的值。从`mapBindings`中获取对应的值并将每一个强转成对应的View类型清空tag。`mapBindings`则是递归把所有view存起来。至此就将所有View绑定到ViewBinging中了。
+
+绑定layout的代码有两种，Acitivity里是DataBindingUtil.setContentView，Fragment里是DataBindingUtil.inflate，两个方法调用后都会走到DataBindingUtil.bind这个方法
+
+## V和VM绑定
+`binding.setVariable`或者`binding.setViewModel`，最终还是会调用`setViewModel`。
+setVariable方法是根据xml中data定义的name生成的，要传递一个BR中的id值，BR是自动生成的：
+1. xml中中设置variable的name属性
+2. VM继承BaseObservable，将某个成员变量加上@Bindable注解
+3. VM继承BaseObservable，将get,set,is开头的方法加上@Bindable注解
+引用关系：
+![](img/3387045-7534a60360ad0ede.webp)
+
+## VM回调通知V
+当VM层调用notifyPropertyChanged方法时，最终在ViewDataBinding的executeBindings方法中处理逻辑
+
 ## 架构
 ![](img/final-architecture.png)
-
-## 使用示例
-``build.gradle``
-```groovy
-android {
-    ···
-    dataBinding {
-        enabled = true
-    }
-}
-dependencies {
-    ···
-    implementation "androidx.fragment:fragment-ktx:$rootProject.fragmentVersion"
-    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycleVersion"
-}
-```
-
-``fragment_plant_detail.xml``
-```xml
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <data>
-        <variable
-            name="viewModel"
-            type="com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel" />
-    </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            ···
-            android:text="@{viewModel.plant.name}"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>
-```
-
-
-``PlantDetailFragment.kt``
-```kotlin
-class PlantDetailFragment : Fragment() {
-
-    private val args: PlantDetailFragmentArgs by navArgs()
-    private lateinit var shareText: String
-
-    private val plantDetailViewModel: PlantDetailViewModel by viewModels {
-        InjectorUtils.providePlantDetailViewModelFactory(requireActivity(), args.plantId)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
-                inflater, R.layout.fragment_plant_detail, container, false).apply {
-            viewModel = plantDetailViewModel
-            lifecycleOwner = this@PlantDetailFragment
-        }
-
-        plantDetailViewModel.plant.observe(this) { plant ->
-            // 更新相关 UI
-        }
-
-        return binding.root
-    }
-}
-```
-
-``Plant.kt``
-```kotlin
-data class Plant (
-    val name: String
-)
-```
-
-``PlantDetailViewModel.kt``
-```kotlin
-class PlantDetailViewModel(
-    plantRepository: PlantRepository,
-    private val plantId: String
-) : ViewModel() {
-
-    val plant: LiveData<Plant>
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.cancel()
-    }
-
-    init {
-        plant = plantRepository.getPlant(plantId)
-    }
-}
-```
-
-``PlantDetailViewModelFactory.kt``
-```kotlin
-class PlantDetailViewModelFactory(
-    private val plantRepository: PlantRepository,
-    private val plantId: String
-) : ViewModelProvider.NewInstanceFactory() {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PlantDetailViewModel(plantRepository, plantId) as T
-    }
-}
-```
-
-``InjectorUtils.kt``
-```kotlin
-object InjectorUtils {
-    private fun getPlantRepository(context: Context): PlantRepository {
-        ···
-    }
-
-    fun providePlantDetailViewModelFactory(
-        context: Context,
-        plantId: String
-    ): PlantDetailViewModelFactory {
-        return PlantDetailViewModelFactory(getPlantRepository(context), plantId)
-    }
-}
-```
 
 # NDK 开发
 > NDK 全称是 Native Development Kit，是一组可以让你在 Android 应用中编写实现 C/C++ 的工具，可以在项目用自己写源代码构建，也可以利用现有的预构建库。
@@ -925,6 +817,7 @@ public Class findClass(String name) {
 `dexElements`数组的每个元素都代表着一个dex文件，所以为了让补丁包中要替换的类抢先于有bug的类被加载，就需要将补丁包dex插入到dexElements数组的头部。
 
 # 多渠道打包
+## 官方方式
 AndroidManifest中添加渠道标识
 ```
 <meta-data
@@ -970,6 +863,19 @@ try {
     e.printStackTrace();
 }
 ```
+
+## 美团原理
+V2签名将APK分成4个区域，其中134受到保护
+![](img/b6ff18f5.png)
+区块2中的内容：
+
+![](img/20201223100414.png)
+
+ID-value是个数组，所以可以在这里添加信息
+
+1. 对新的应用签名方案生成的APK包中的ID-value进行扩展，提供自定义ID－value（渠道信息），并保存在APK中
+2. 而APK在安装过程中进行的签名校验，是忽略我们添加的这个ID-value的，这样就能正常安装了
+3. 在App运行阶段，可以通过ZIP的EOCD（End of central directory）、Central directory等结构中的信息（会涉及ZIP格式的相关知识，这里不做展开描述）找到我们自己添加的ID-value，从而实现获取渠道信息的功能
 
 # JetPack
 旨在提供兼容并规范的代码库
@@ -1078,3 +984,53 @@ public abstract class BaseObserver<T> extends AtomicReference<Disposable> implem
 
 }
 ```
+
+# Zygote
+[现在看似乎有些早了](https://jsonchao.github.io/categories/Android%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/)
+
+在Android系统中，zygote是一个native进程，是Android系统上所有应用进程的父进程，我们系统上app的进程都是由这个zygote分裂出来的。zygote则是由Linux系统用户空间的第一个进程——init进程，通过fork的方式创建的。
+zygote进程做了两个重要的事情：
+1. 不断接收其它进程的信号，随时创建子进程（即app进程）
+2. 创建了嫡长子 —— system_server进程
+
+zygote进程启动之后，首先创建了Java虚拟机，该虚拟机是Android系统启动后的第一个虚拟机，然后注册JNI调用，接着调用了Java层的ZygoteInit类的main函数，进入了Java的世界。接着，Java世界的ZygoteInit开始了zygote的工作，工作的步骤按顺序如下：
+
+1. 建立一个Socket服务端，监听客户端的连接，用于IPC通信。
+这里是为了响应创建子进程的请求，当收到请求时，zygote执行一系列操作，最后通过fork创建子进程，请求是在第4步启动循环后处理的。
+举个例子，应用程序A通过startActivity启动了应用程序B的Activity，但此时B进程并未启动，那么，A将利用Binder机制向系统的ActivityManagerService服务发送启动Activity的请求，而ActivityManagerService服务驻留在system_server进程，因此A将把请求发往system_server进程，system_server进程进而新建一个LocalSocket与zygote的ServerSocket进行连接，向zygote进程发送启动子进程的请求，并带上参数“android.app.ActivityThread”，zygote收到请求后通过fork的方式启动了子进程，并执行子进程的android.app.ActivityThread类中的main()函数，完成了应用程序B的进程的创建。
+
+2. 预加载类和资源
+预加载类：系统有一个文件列表，保存着需要由zygote进行预加载的类的全路径，这些类是framework/base/tools/preload工具判断的加载时间超过1250微秒的类，zygote通过Class.forName()的方式进行预加载。这个列表不小，每一行一个类，超过了1000行，这也是Android系统启动慢的原因之一。
+zygote预加载类的一个好处是：预加载一次类后，在通过fork创建子进程时，只需要做一个复制即可，这样便加快了子进程的启动速度。
+预加载资源：主要是加载framework-res.apk中的资源，在UI编程中常使用的com.android.R.XXX资源，是系统默认的资源，它们就是由zygote加载的。
+
+3. 通过fork的方式，启动system_server进程
+system_server进程是zygote进程创建的第一个进程，也就是“嫡长子”，其中驻留着Android系统多个重要的服务，比如EntropyService、PowerManagerService、BatteryService、WindowManagerService、ActivityManagerService等。
+zygote进程内部通过函数startSystemServer()启动system_server进程，该函数采用了抛出异常后在异常捕获处继续执行的技巧，使得system_server进程跳过了zygote进程后续的步骤进入system_server的Java世界，这些步骤包括使得Zygote进入无限循环的runSelectLoopMode()方法。
+system_server的一个重要的特点是，它支持使用Binder进行进程间通信，它已经进入了Binder的世界，不用跟zygote进程一样使用Socket。
+另一个特点是，system_server是和zygote共存亡的，只要system_server被杀死，zygote也会把自己杀掉，这就导致了系统的重启。
+
+4. 通过调用runSelectLoopMode()方法，进入无限循环，等待客户端的连接请求，并处理请求。
+这里可以发现，无论是zygote进程，还是system_server进程，或者是zygote分裂的应用子进程，他们的模式都是在进行必要的native初始化后，随即调用Java层某个类的main函数，从而进入Java的世界，主要逻辑都是在Java层完成。比如zygote进程的ZygoteInit.java类、system_server进程的SystemServer.java类、应用子进程的ActivityThread.java类
+
+关于fork：
+只在Unix系的系统中有这个函数，window系统是没有的。它是一个系统调用，调用它之后，可以创建一个与当前进程一模一样的进程，包括相同的进程上下文、堆栈地址、内存信息、PCB等。调用fork的进程称为父进程，fork将返回子进程的pid，而新的进程称为子进程，子进程将从fork()处开始执行，并且fork将返回0。
+```c
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    pid_t fpid;
+    int r = rand();
+    printf("before fork\n");
+    fpid = fork();
+    printf("fpid:%d, rand: %d\n", fpid, r);
+    return 0;
+}
+```
+以上代码的运行结果是：
+before fork
+
+fpid：18570，rand：1804289383
+
+fpid：0，rand：1804289383

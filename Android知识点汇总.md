@@ -1,105 +1,83 @@
+<!-- TOC -->
+
 - [Activity](#activity)
-  - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f)
-  - [启动模式](#%e5%90%af%e5%8a%a8%e6%a8%a1%e5%bc%8f)
-  - [启动过程](#%e5%90%af%e5%8a%a8%e8%bf%87%e7%a8%8b)
+    - [生命周期](#生命周期)
+    - [启动模式](#启动模式)
+    - [启动过程](#启动过程)
 - [Fragment](#fragment)
-  - [特点](#%e7%89%b9%e7%82%b9)
-  - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f-1)
-  - [与Activity通信](#%e4%b8%8eactivity%e9%80%9a%e4%bf%a1)
+    - [特点](#特点)
+    - [生命周期](#生命周期)
+    - [与Activity通信](#与activity通信)
+    - [缓存](#缓存)
 - [Service](#service)
-  - [bindService启动服务的特点](#bindService启动服务的特点)
-  - [启动过程](#%e5%90%af%e5%8a%a8%e8%bf%87%e7%a8%8b-1)
-  - [绑定过程](#%e7%bb%91%e5%ae%9a%e8%bf%87%e7%a8%8b)
-  - [生命周期](#%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f-2)
-  - [启用前台服务](#%e5%90%af%e7%94%a8%e5%89%8d%e5%8f%b0%e6%9c%8d%e5%8a%a1)
-  - [JobService/JobIntentService](#JobService/JobIntentService)
+    - [启动过程](#启动过程)
+    - [bindService启动服务的特点](#bindservice启动服务的特点)
+    - [绑定过程](#绑定过程)
+    - [生命周期](#生命周期)
+    - [启用前台服务](#启用前台服务)
+    - [JobService/JobIntentService](#jobservicejobintentservice)
 - [BroadcastReceiver](#broadcastreceiver)
-  - [注册过程](#%e6%b3%a8%e5%86%8c%e8%bf%87%e7%a8%8b)
+    - [注册过程](#注册过程)
 - [ContentProvider](#contentprovider)
-  - [基本使用](#%e5%9f%ba%e6%9c%ac%e4%bd%bf%e7%94%a8)
-- [数据存储](#%e6%95%b0%e6%8d%ae%e5%ad%98%e5%82%a8)
+    - [基本使用](#基本使用)
+- [数据存储](#数据存储)
+    - [SharedPreferences](#sharedpreferences)
+    - [文件](#文件)
 - [View](#view)
-  - [MeasureSpec](#measurespec)
-  - [MotionEvent](#motionevent)
-  - [VelocityTracker](#velocitytracker)
-  - [GestureDetector](#gesturedetector)
-  - [Scroller](#scroller)
-  - [View 的滑动](#view-%e7%9a%84%e6%bb%91%e5%8a%a8)
-  - [View 的事件分发](#view-%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%88%86%e5%8f%91)
-  - [在 Activity 中获取某个 View 的宽高](#%e5%9c%a8-activity-%e4%b8%ad%e8%8e%b7%e5%8f%96%e6%9f%90%e4%b8%aa-view-%e7%9a%84%e5%ae%bd%e9%ab%98)
-  - [Draw 的基本流程](#draw-%e7%9a%84%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b)
-  - [自定义 View](#%e8%87%aa%e5%ae%9a%e4%b9%89-view)
-- [进程](#%e8%bf%9b%e7%a8%8b)
-  - [进程生命周期](#%e8%bf%9b%e7%a8%8b%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f)
-  - [多进程](#%e5%a4%9a%e8%bf%9b%e7%a8%8b)
-  - [进程存活](#%e8%bf%9b%e7%a8%8b%e5%ad%98%e6%b4%bb)
-    - [OOM_ADJ](#oomadj)
-    - [进程被杀情况](#%e8%bf%9b%e7%a8%8b%e8%a2%ab%e6%9d%80%e6%83%85%e5%86%b5)
-    - [进程保活方案](#%e8%bf%9b%e7%a8%8b%e4%bf%9d%e6%b4%bb%e6%96%b9%e6%a1%88)
-- [Parcelable 接口](#parcelable-%e6%8e%a5%e5%8f%a3)
-  - [使用示例](#%e4%bd%bf%e7%94%a8%e7%a4%ba%e4%be%8b)
-  - [方法说明](#%e6%96%b9%e6%b3%95%e8%af%b4%e6%98%8e)
-  - [Parcelable 与 Serializable 对比](#parcelable-%e4%b8%8e-serializable-%e5%af%b9%e6%af%94)
+    - [MeasureSpec](#measurespec)
+    - [MotionEvent](#motionevent)
+    - [VelocityTracker](#velocitytracker)
+    - [GestureDetector](#gesturedetector)
+    - [Scroller](#scroller)
+    - [View 的滑动](#view-的滑动)
+    - [View 的事件分发](#view-的事件分发)
+    - [在 Activity 中获取某个 View 的宽高](#在-activity-中获取某个-view-的宽高)
+    - [Draw 的基本流程](#draw-的基本流程)
+    - [自定义 View](#自定义-view)
+- [进程](#进程)
+    - [进程生命周期](#进程生命周期)
+    - [多进程](#多进程)
+    - [进程存活](#进程存活)
+- [Parcelable 接口](#parcelable-接口)
+    - [使用示例](#使用示例)
+    - [方法说明](#方法说明)
+    - [Parcelable 与 Serializable 对比](#parcelable-与-serializable-对比)
 - [IPC](#ipc)
-  - [IPC方式](#ipc%e6%96%b9%e5%bc%8f)
-  - [Binder](#binder)
-  - [AIDL 通信](#aidl-%e9%80%9a%e4%bf%a1)
-  - [Messenger](#messenger)
+    - [IPC方式](#ipc方式)
+    - [Binder](#binder)
+    - [AIDL 通信](#aidl-通信)
+    - [Messenger](#messenger)
 - [Window / WindowManager](#window--windowmanager)
-  - [Window 概念与分类](#window-%e6%a6%82%e5%bf%b5%e4%b8%8e%e5%88%86%e7%b1%bb)
-  - [Window 的内部机制](#window-%e7%9a%84%e5%86%85%e9%83%a8%e6%9c%ba%e5%88%b6)
-  - [Window 的创建过程](#window-%e7%9a%84%e5%88%9b%e5%bb%ba%e8%bf%87%e7%a8%8b)
-    - [Activity 的 Window 创建过程](#activity-%e7%9a%84-window-%e5%88%9b%e5%bb%ba%e8%bf%87%e7%a8%8b)
-    - [Dialog 的 Window 创建过程](#dialog-%e7%9a%84-window-%e5%88%9b%e5%bb%ba%e8%bf%87%e7%a8%8b)
-    - [Toast 的 Window 创建过程](#toast-%e7%9a%84-window-%e5%88%9b%e5%bb%ba%e8%bf%87%e7%a8%8b)
+    - [Window 概念与分类](#window-概念与分类)
+    - [Window 的内部机制](#window-的内部机制)
+    - [Window 的创建过程](#window-的创建过程)
 - [Bitmap](#bitmap)
-  - [配置信息与压缩方式](#%e9%85%8d%e7%bd%ae%e4%bf%a1%e6%81%af%e4%b8%8e%e5%8e%8b%e7%bc%a9%e6%96%b9%e5%bc%8f)
-  - [常用操作](#%e5%b8%b8%e7%94%a8%e6%93%8d%e4%bd%9c)
-    - [裁剪、缩放、旋转、移动](#%e8%a3%81%e5%89%aa%e7%bc%a9%e6%94%be%e6%97%8b%e8%bd%ac%e7%a7%bb%e5%8a%a8)
-    - [Bitmap与Drawable转换](#bitmap%e4%b8%8edrawable%e8%bd%ac%e6%8d%a2)
-    - [保存与释放](#%e4%bf%9d%e5%ad%98%e4%b8%8e%e9%87%8a%e6%94%be)
-    - [图片压缩](#%e5%9b%be%e7%89%87%e5%8e%8b%e7%bc%a9)
-  - [BitmapFactory](#bitmapfactory)
-    - [Bitmap创建流程](#bitmap%e5%88%9b%e5%bb%ba%e6%b5%81%e7%a8%8b)
-    - [Option类](#option%e7%b1%bb)
-    - [基本使用](#%e5%9f%ba%e6%9c%ac%e4%bd%bf%e7%94%a8-1)
-  - [内存回收](#%e5%86%85%e5%ad%98%e5%9b%9e%e6%94%b6)
-- [屏幕适配](#%e5%b1%8f%e5%b9%95%e9%80%82%e9%85%8d)
-  - [单位](#%e5%8d%95%e4%bd%8d)
-  - [头条适配方案](#%e5%a4%b4%e6%9d%a1%e9%80%82%e9%85%8d%e6%96%b9%e6%a1%88)
-  - [刘海屏适配](#%e5%88%98%e6%b5%b7%e5%b1%8f%e9%80%82%e9%85%8d)
+    - [配置信息与压缩方式](#配置信息与压缩方式)
+    - [常用操作](#常用操作)
+    - [BitmapFactory](#bitmapfactory)
+    - [内存回收](#内存回收)
+- [屏幕适配](#屏幕适配)
+    - [单位](#单位)
+    - [头条适配方案](#头条适配方案)
+    - [刘海屏适配](#刘海屏适配)
 - [Context](#context)
-- [SharedPreferences](#sharedpreferences)
-  - [获取方式](#%e8%8e%b7%e5%8f%96%e6%96%b9%e5%bc%8f)
-    - [getPreferences](#getpreferences)
-    - [getDefaultSharedPreferences](#getdefaultsharedpreferences)
-    - [getSharedPreferences](#getsharedpreferences)
-  - [架构](#%e6%9e%b6%e6%9e%84)
-  - [apply / commit](#apply--commit)
-  - [注意](#%e6%b3%a8%e6%84%8f)
-- [消息机制](#%e6%b6%88%e6%81%af%e6%9c%ba%e5%88%b6)
-  - [Handler 机制](#handler-%e6%9c%ba%e5%88%b6)
-  - [工作原理](#%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86)
-    - [ThreadLocal](#threadlocal)
-    - [MessageQueue](#messagequeue)
-    - [Looper](#looper)
-    - [Handler](#handler)
-- [线程异步](#%e7%ba%bf%e7%a8%8b%e5%bc%82%e6%ad%a5)
-  - [AsyncTask](#asynctask)
-    - [基本使用](#%e5%9f%ba%e6%9c%ac%e4%bd%bf%e7%94%a8-2)
-    - [工作原理](#%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86-1)
-  - [HandlerThread](#handlerthread)
-  - [IntentService](#intentservice)
-  - [线程池](#%e7%ba%bf%e7%a8%8b%e6%b1%a0)
-- [RecyclerView 优化](#recyclerview-%e4%bc%98%e5%8c%96)
+- [消息机制](#消息机制)
+    - [Handler 机制](#handler-机制)
+    - [工作原理](#工作原理)
+- [线程异步](#线程异步)
+    - [AsyncTask](#asynctask)
+    - [HandlerThread](#handlerthread)
+    - [IntentService](#intentservice)
+    - [线程池](#线程池)
+- [RecyclerView 优化](#recyclerview-优化)
 - [Webview](#webview)
-  - [基本使用](#%e5%9f%ba%e6%9c%ac%e4%bd%bf%e7%94%a8-3)
-    - [WebView](#webview-1)
-    - [WebSettings](#websettings)
-    - [WebViewClient](#webviewclient)
-    - [WebChromeClient](#webchromeclient)
-  - [Webview 加载优化](#webview-%e5%8a%a0%e8%bd%bd%e4%bc%98%e5%8c%96)
-  - [内存泄漏](#%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f)
+    - [基本使用](#基本使用)
+    - [Webview 加载优化](#webview-加载优化)
+    - [内存泄漏](#内存泄漏)
+
+<!-- /TOC -->
+
+  
 # Activity
 ## 生命周期  
 ![](img/activity.png)
@@ -254,6 +232,26 @@ public static class FragmentA extends ListFragment {
         }
     }
     ...
+}
+```
+
+## 缓存
+```java
+// 保存
+override fun onSaveInstanceState(outState: Bundle) {
+     super.onSaveInstanceState(outState)
+     outState.putInt("position",position)
+     supportFragmentManager.putFragment(outState, F1_KEY,fragment1)
+     supportFragmentManager.putFragment(outState, F2_KEY,fragment2)
+}
+// 读取
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    if(savedInstanceState != null){
+        position = savedInstanceState.getInt("position",0)
+        val f1 = supportFragmentManager.getFragment(savedInstanceState, F1_KEY)
+        val f2 = supportFragmentManager.getFragment(savedInstanceState, F2_KEY)
+    }
 }
 ```
 
@@ -443,6 +441,109 @@ public class Installer extends ContentProvider {
 | 内部存储 | 在设备内存中存储私有数据 |
 | 外部存储 | 在共享的外部存储中存储公共数据 |
 | SQLite 数据库 | 在私有数据库中存储结构化数据 |
+
+## SharedPreferences
+SharedPreferences 采用key-value（键值对）形式, 主要用于轻量级的数据存储, 尤其适合保存应用的配置参数, 但不建议使用 SharedPreferences 来存储大规模的数据, 可能会降低性能.
+
+SharedPreferences采用xml文件格式来保存数据, 该文件所在目录位于 ``/data/data/<package name>/shared_prefs``，如：
+```xml
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+   <string name="blog">https://github.com/JasonWu1111/Android-Review</string>
+</map>
+```
+
+从Android N开始, 创建的 SP 文件模式, 不允许 ``MODE_WORLD_READABLE`` 和 ``MODE_WORLD_WRITEABLE`` 模块, 否则会直接抛出异常 SecurityException。 ``MODE_MULTI_PROCESS`` 这种多进程的方式也是 Google 不推荐的方式, 后续同样会不再支持。
+
+当设置 MODE_MULTI_PROCESS 模式, 则每次 getSharedPreferences 过程, 会检查 SP 文件上次修改时间和文件大小, 一旦所有修改则会重新从磁盘加载文件。
+
+### 获取方式
+#### getPreferences
+Activity.getPreferences(mode): 以当前 Activity 的类名作为 SP 的文件名. 即 xxxActivity.xml
+``Activity.java``
+```java
+public SharedPreferences getPreferences(int mode) {
+    return getSharedPreferences(getLocalClassName(), mode);
+}
+```
+
+#### getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences(Context): 以包名加上 _preferences 作为文件名, 以 MODE_PRIVATE 模式创建 SP 文件. 即 packgeName_preferences.xml.
+```java
+public static SharedPreferences getDefaultSharedPreferences(Context context) {
+    return context.getSharedPreferences(getDefaultSharedPreferencesName(context),
+           getDefaultSharedPreferencesMode());
+}
+```
+
+#### getSharedPreferences
+直接调用 Context.getSharedPreferences(name, mode)，所有的方法最终都是调用到如下方法：
+```java
+class ContextImpl extends Context {
+    private ArrayMap<String, File> mSharedPrefsPaths;
+
+    public SharedPreferences getSharedPreferences(String name, int mode) {
+        File file;
+        synchronized (ContextImpl.class) {
+            if (mSharedPrefsPaths == null) {
+                mSharedPrefsPaths = new ArrayMap<>();
+            }
+            //先从mSharedPrefsPaths查询是否存在相应文件
+            file = mSharedPrefsPaths.get(name);
+            if (file == null) {
+                //如果文件不存在, 则创建新的文件 
+                file = getSharedPreferencesPath(name);
+                mSharedPrefsPaths.put(name, file);
+            }
+        }
+ 
+        return getSharedPreferences(file, mode);
+    }
+}
+```
+
+### 架构
+![](img/shared_preference.jpg)
+
+SharedPreferences 与 Editor 只是两个接口. SharedPreferencesImpl 和 EditorImpl 分别实现了对应接口。另外, ContextImpl 记录着 SharedPreferences 的重要数据。
+
+``putxxx()`` 操作把数据写入到EditorImpl.mModified；
+
+``apply()/commit()`` 操作先调用 commitToMemory(), 将数据同步到 SharedPreferencesImpl 的 mMap, 并保存到 MemoryCommitResult 的 mapToWriteToDisk，再调用 enqueueDiskWrite(), 写入到磁盘文件; 先之前把原有数据保存到 .bak 为后缀的文件,用于在写磁盘的过程出现任何异常可恢复数据;
+
+``getxxx()`` 操作从 SharedPreferencesImpl.mMap 读取数据.
+
+### apply / commit
+- apply 没有返回值, commit 有返回值能知道修改是否提交成功  
+- apply 是将修改提交到内存，再异步提交到磁盘文件，而 commit 是同步的提交到磁盘文件
+- 多并发的提交 commit 时，需等待正在处理的 commit 数据更新到磁盘文件后才会继续往下执行，从而降低效率; 而 apply 只是原子更新到内存，后调用 apply 函数会直接覆盖前面内存数据，从一定程度上提高很多效率。
+
+### 注意
+- 强烈建议不要在 sp 里面存储特别大的 key/value，有助于减少卡顿 / anr
+- 不要高频地使用 apply，尽可能地批量提交
+- 不要使用 MODE_MULTI_PROCESS
+- 高频写操作的 key 与高频读操作的 key 可以适当地拆分文件，由于减少同步锁竞争
+- 不要连续多次 edit()，应该获取一次获取 edit()，然后多次执行 putxxx()，减少内存波动
+
+## 文件
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--对应应用内部根目录：Context.getFileDir()-->
+    <files-path name="files" path="/" />
+    <!--对应应用默认缓存根目录：Context.getCacheDir()-->
+    <cache-path name="cache" path="/" />
+    <!--对应外部内存卡根目录：Environment.getExternalStorageDirectory()-->
+    <external-path name="external" path="/" />
+    <!--对应外部内存卡根目录下的APP公共目录：Context.getExternalFileDir(String)-->
+    <external-files-path name="external_files" path="/" />
+    <!--对应外部内存卡根目录下的APP缓存目录：Context.getExternalCacheDir()-->
+    <external-cache-path name="external_cache" path="/" />
+</paths>
+```
+安卓4.4开始，无需任何权限即可访问外部储存空间的私有目录
+
+安卓10开始禁止访问储存卡公共目录，但可以在清单文件中添加`requestLegacyExternalStorage=true`来继续访问，但在安卓11中这个标记将会失效
 
 # View
 ![](img/16b4a8a388f3a91a.jpeg)
@@ -1673,89 +1774,6 @@ Context 本身是一个抽象类，是对一系列系统服务接口的封装，
 ContextWrapper是代理Context的实现，简单地将其所有调用委托给另一个Context（mBase）。
 
 Application、Activity、Service通过``attach() ``调用父类ContextWrapper的``attachBaseContext()``, 从而设置父类成员变量 mBase 为 ContextImpl 对象, ContextWrapper 的核心工作都是交给 mBase(ContextImpl) 来完成，这样可以子类化 Context 以修改行为而无需更改原始 Context。
-
-# SharedPreferences
-SharedPreferences 采用key-value（键值对）形式, 主要用于轻量级的数据存储, 尤其适合保存应用的配置参数, 但不建议使用 SharedPreferences 来存储大规模的数据, 可能会降低性能.
-
-SharedPreferences采用xml文件格式来保存数据, 该文件所在目录位于 ``/data/data/<package name>/shared_prefs``，如：
-```xml
-<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
-<map>
-   <string name="blog">https://github.com/JasonWu1111/Android-Review</string>
-</map>
-```
-
-从Android N开始, 创建的 SP 文件模式, 不允许 ``MODE_WORLD_READABLE`` 和 ``MODE_WORLD_WRITEABLE`` 模块, 否则会直接抛出异常 SecurityException。 ``MODE_MULTI_PROCESS`` 这种多进程的方式也是 Google 不推荐的方式, 后续同样会不再支持。
-
-当设置 MODE_MULTI_PROCESS 模式, 则每次 getSharedPreferences 过程, 会检查 SP 文件上次修改时间和文件大小, 一旦所有修改则会重新从磁盘加载文件。
-
-## 获取方式
-### getPreferences
-Activity.getPreferences(mode): 以当前 Activity 的类名作为 SP 的文件名. 即 xxxActivity.xml
-``Activity.java``
-```java
-public SharedPreferences getPreferences(int mode) {
-    return getSharedPreferences(getLocalClassName(), mode);
-}
-```
-
-### getDefaultSharedPreferences
-PreferenceManager.getDefaultSharedPreferences(Context): 以包名加上 _preferences 作为文件名, 以 MODE_PRIVATE 模式创建 SP 文件. 即 packgeName_preferences.xml.
-```java
-public static SharedPreferences getDefaultSharedPreferences(Context context) {
-    return context.getSharedPreferences(getDefaultSharedPreferencesName(context),
-           getDefaultSharedPreferencesMode());
-}
-```
-
-### getSharedPreferences
-直接调用 Context.getSharedPreferences(name, mode)，所有的方法最终都是调用到如下方法：
-```java
-class ContextImpl extends Context {
-    private ArrayMap<String, File> mSharedPrefsPaths;
-
-    public SharedPreferences getSharedPreferences(String name, int mode) {
-        File file;
-        synchronized (ContextImpl.class) {
-            if (mSharedPrefsPaths == null) {
-                mSharedPrefsPaths = new ArrayMap<>();
-            }
-            //先从mSharedPrefsPaths查询是否存在相应文件
-            file = mSharedPrefsPaths.get(name);
-            if (file == null) {
-                //如果文件不存在, 则创建新的文件 
-                file = getSharedPreferencesPath(name);
-                mSharedPrefsPaths.put(name, file);
-            }
-        }
- 
-        return getSharedPreferences(file, mode);
-    }
-}
-```
-
-## 架构
-![](img/shared_preference.jpg)
-
-SharedPreferences 与 Editor 只是两个接口. SharedPreferencesImpl 和 EditorImpl 分别实现了对应接口。另外, ContextImpl 记录着 SharedPreferences 的重要数据。
-
-``putxxx()`` 操作把数据写入到EditorImpl.mModified；
-
-``apply()/commit()`` 操作先调用 commitToMemory(), 将数据同步到 SharedPreferencesImpl 的 mMap, 并保存到 MemoryCommitResult 的 mapToWriteToDisk，再调用 enqueueDiskWrite(), 写入到磁盘文件; 先之前把原有数据保存到 .bak 为后缀的文件,用于在写磁盘的过程出现任何异常可恢复数据;
-
-``getxxx()`` 操作从 SharedPreferencesImpl.mMap 读取数据.
-
-## apply / commit
-- apply 没有返回值, commit 有返回值能知道修改是否提交成功  
-- apply 是将修改提交到内存，再异步提交到磁盘文件，而 commit 是同步的提交到磁盘文件
-- 多并发的提交 commit 时，需等待正在处理的 commit 数据更新到磁盘文件后才会继续往下执行，从而降低效率; 而 apply 只是原子更新到内存，后调用 apply 函数会直接覆盖前面内存数据，从一定程度上提高很多效率。
-
-## 注意
-- 强烈建议不要在 sp 里面存储特别大的 key/value，有助于减少卡顿 / anr
-- 不要高频地使用 apply，尽可能地批量提交
-- 不要使用 MODE_MULTI_PROCESS
-- 高频写操作的 key 与高频读操作的 key 可以适当地拆分文件，由于减少同步锁竞争
-- 不要连续多次 edit()，应该获取一次获取 edit()，然后多次执行 putxxx()，减少内存波动
 
 # 消息机制
 ## Handler 机制
