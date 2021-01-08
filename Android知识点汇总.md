@@ -543,7 +543,17 @@ SharedPreferences 与 Editor 只是两个接口. SharedPreferencesImpl 和 Edito
 ```
 安卓4.4开始，无需任何权限即可访问外部储存空间的私有目录
 
-安卓10开始禁止访问储存卡公共目录，但可以在清单文件中添加`requestLegacyExternalStorage=true`来继续访问，但在安卓11中这个标记将会失效
+安卓10开始禁止访问储存卡公共目录，但可以在清单文件中添加`requestLegacyExternalStorage=true`来继续访问，但在安卓11中这个标记将会失效。
+
+如果 APP 想要在卸载时保留私有目录下的数据，要在 AndroidManifest.xml 中声明 `android:hasFragileUserData="true"`，这样在 APP 卸载时就会有弹出框提示用户是否保留应用数据。
+
+安卓11中使用`preserveLegacyExternalStorage`来让升级安装的应用有SD卡访问权限，但新安装的应用不会生效。
+
+安卓10开始应使用`MediaStore`访问媒体文件，对于非媒体文件只能使用`SAF`访问
+
+安卓10开始使用`MANAGE_EXTERNAL_STORAGE `权限能申请SD卡所有权限，使用`ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION` intent 操作将用户引导至一个系统设置页面，在该页面上，用户可以为应用启用以下选项：授予所有文件的管理权限
+
+安卓10开始没有权限只能访问自己创建的媒体文件，有权限也只能访问MediaStore.Images、MediaStore.Audio、MediaStore.Video
 
 # View
 ![](img/16b4a8a388f3a91a.jpeg)
