@@ -34,7 +34,6 @@
     - [在 Activity 中获取某个 View 的宽高](#在-activity-中获取某个-view-的宽高)
     - [Draw 的基本流程](#draw-的基本流程)
     - [自定义 View](#自定义-view)
-    - [不常用的东西](#不常用的东西)
 - [进程](#进程)
     - [进程生命周期](#进程生命周期)
     - [多进程](#多进程)
@@ -840,12 +839,6 @@ public void draw(Canvas canvas) {
 - 继承 ViewGroup 派生特殊的 Layout
   
 主要用于实现自定义布局，采用这种方式需要合适地处理 ViewGroup 的测量、布局两个过程，并同时处理子元素的测量和布局过程。
-
-## 不常用的东西
-- 实现文字上下变淡 `android:fadingEdge`
-- scrollview嵌套viewpager时候解决显示不全`android:fillViewport`
-- listview之类的滚动到边缘是否显示动画`android:overScrollMode`
-- 是否显示滚动条`android:scrollbars`
 
 # 进程
 当某个应用组件启动且该应用没有运行其他任何组件时，Android 系统会使用单个执行线程为应用启动新的 Linux 进程。默认情况下，同一应用的所有组件在相同的进程和线程（称为“主”线程）中运行。
