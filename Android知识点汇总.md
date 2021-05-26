@@ -16,6 +16,7 @@
     - [生命周期](#生命周期)
     - [启用前台服务](#启用前台服务)
     - [JobService/JobIntentService](#jobservicejobintentservice)
+    - [IntentService](#intentservice)
 - [BroadcastReceiver](#broadcastreceiver)
     - [注册过程](#注册过程)
 - [ContentProvider](#contentprovider)
@@ -58,6 +59,8 @@
     - [内存回收](#内存回收)
 - [屏幕适配](#屏幕适配)
     - [单位](#单位)
+    - [宽高限定符适配](#宽高限定符适配)
+    - [smallestWidth适配](#smallestWidth适配)
     - [头条适配方案](#头条适配方案)
     - [刘海屏适配](#刘海屏适配)
 - [Context](#context)
@@ -67,7 +70,6 @@
 - [线程异步](#线程异步)
     - [AsyncTask](#asynctask)
     - [HandlerThread](#handlerthread)
-    - [IntentService](#intentservice)
     - [线程池](#线程池)
 - [RecyclerView 优化](#recyclerview-优化)
 - [Webview](#webview)
@@ -360,6 +362,57 @@ JobService与JobIntentService相比 JobService使用的handler使用的是主线
 
 JobIntentService通过`enqueueWork`启动，通过`onHandleWork`处理工作内容
 
+Android O以后JobIntentService不会立即执行，等手机进入一定状态后才会执行任务，所以不能用来执行及时的后台任务。
+
+## IntentService
+IntentService 可用于执行后台耗时的任务，当任务执行后会自动停止，由于其是 Service 的原因，它的优先级比单纯的线程要高，所以 IntentService 适合执行一些高优先级的后台任务。在实现上，IntentService 封装了 HandlerThread 和 Handler。
+
+``IntentService.java``
+```java
+@Override
+public void onCreate() {
+    // TODO: It would be nice to have an option to hold a partial wakelock
+    // during processing, and to have a static startService(Context, Intent)
+    // method that would launch the service & hand off a wakelock.
+
+    super.onCreate();
+    HandlerThread thread = new HandlerThread("IntentService[" + mName + "]");
+    thread.start();
+
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+}
+```
+
+IntentService 第一次启动时，会在 onCreatea 方法中创建一个 HandlerThread，然后使用的 Looper 来构造一个 Handler 对象 mServiceHandler，这样通过 mServiceHandler 发送的消息最终都会在 HandlerThread 中执行。每次启动 IntentService，它的 onStartCommand 方法就会调用一次，onStartCommand 中处理每个后台任务的 Intent，onStartCommand 调用了 onStart 方法：
+
+``IntentService.java``
+```java
+private final class ServiceHandler extends Handler {
+    public ServiceHandler(Looper looper) {
+        super(looper);
+    }
+
+    @Override
+    public void handleMessage(Message msg) {
+        onHandleIntent((Intent)msg.obj);
+        stopSelf(msg.arg1);
+    }
+}
+
+···
+
+@Override
+public void onStart(@Nullable Intent intent, int startId) {
+    Message msg = mServiceHandler.obtainMessage();
+    msg.arg1 = startId;
+    msg.obj = intent;
+    mServiceHandler.sendMessage(msg);
+}
+```
+
+可以看出，IntentService 仅仅是通过 mServiceHandler 发送了一个消息，这个消息会在 HandlerThread 中被处理。mServiceHandler 收到消息后，会将 Intent 对象传递给 onHandlerIntent 方法中处理，执行结束后，通过 stopSelf(int startId) 来尝试停止服务。（stopSelf() 会立即停止服务，而 stopSelf(int startId) 则会等待所有的消息都处理完毕后才终止服务）。
+
 # BroadcastReceiver
 target 26 之后，无法在 AndroidManifest 显示声明大部分广播，除了一部分必要的广播，如：
 - ACTION_BOOT_COMPLETED
@@ -372,13 +425,15 @@ LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(receiver, 
 ## 注册过程
 ![](img/send_broadcast.jpg)
 
-
 # ContentProvider
 ContentProvider 管理对结构化数据集的访问。它们封装数据，并提供用于定义数据安全性的机制。 内容提供程序是连接一个进程中的数据与另一个进程中运行的代码的标准界面。
 
 ContentProvider 无法被用户感知，对于一个 ContentProvider 组件来说，它的内部需要实现增删该查这四种操作，它的内部维持着一份数据集合，这个数据集合既可以是数据库实现，也可以是其他任何类型，如 List 和 Map，内部的 insert、delete、update、query 方法需要处理好线程同步，因为这几个方法是在 Binder 线程池中被调用的。
 
 ContentProvider 通过 Binder 向其他组件乃至其他应用提供数据。当 ContentProvider 所在的进程启动时，ContentProvider 会同时启动并发布到 AMS 中，需要注意的是，这个时候 ContentProvider 的 onCreate 要先于 Application 的 onCreate 而执行。
+
+特别的用法：
+在 App 启动时，系统会在 App 的主进程中自动实例化你声明的这个 ContentProvider，并调用它的 onCreate 方法，执行时机比 Application#onCreate 还靠前，可以做一些初始化的工作
 
 ## 基本使用
 ```java
@@ -1704,44 +1759,41 @@ density = dpi / 160
 
 dp = px / density
 ```
+
+## 宽高限定符适配
+已停止维护
+
+简单说，就是穷举市面上所有的Android手机的宽高像素值，有个问题，就是找不到对应的宽高值就会使用默认值
+
+## smallestWidth适配
+或者叫sw限定符适配。[链接](https://mp.weixin.qq.com/s/X-aL2vb4uEhqnLzU5wjc4Q)
+
+指的是Android会识别屏幕可用高度和宽度的最小尺寸的dp值（其实就是手机的宽度值），然后根据识别到的结果去资源文件中寻找对应限定符的文件夹下的资源文件。
+
+smallestWidth限定符适配和宽高限定符适配最大的区别在于，前者有很好的容错机制，如果没有value-sw360dp文件夹，系统会向下寻找，比如离360dp最近的只有value-sw350dp，那么Android就会选择value-sw350dp文件夹下面的资源文件。这个特性就完美的解决了上文提到的宽高限定符的容错问题。
+
 ## 头条适配方案
-```java
-private static void setCustomDensity(@NonNull Activity activity, @NonNull final Application application) {
-    final DisplayMetrics appDisplayMetrics = application.getResources().getDisplayMetrics();
-    if (sNoncompatDensity == 0) {
-        sNoncompatDensity = appDisplayMetrics.density;
-        sNoncompatScaledDensity = appDisplayMetrics.scaledDensity;
-        // 监听字体切换
-        application.registerComponentCallbacks(new ComponentCallbacks() {
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                if (newConfig != null && newConfig.fontScale > 0) {
-                    sNoncompatScaledDensity = application.getResources().getDisplayMetrics().scaledDensity;
-                }
-            }
+今日头条屏幕适配方案的核心原理在于，根据以下公式算出 density
 
-            @Override
-            public void onLowMemory() {
+`当前设备屏幕总宽度（单位为像素）/ 设计图总宽度（单位为 dp) = density`
 
-            }
-        });
-    }
-    
-    // 适配后的dpi将统一为360dpi
-    final float targetDensity = appDisplayMetrics.widthPixels / 360;
-    final float targetScaledDensity = targetDensity * (sNoncompatScaledDensity / sNoncompatDensity);
-    final int targetDensityDpi = (int)(160 * targetDensity);
+density 的意思就是 1 dp 占当前设备多少像素
 
-    appDisplayMetrics.density = targetDensity;
-    appDisplayMetrics.scaledDensity = targetScaledDensity;
-    appDisplayMetrics.densityDpi = targetDensityDpi;
+通过修改`density`来使1dp的大小与设计图的1dp相当，使用的都是系统公开API。[链接](https://mp.weixin.qq.com/s/X-aL2vb4uEhqnLzU5wjc4Q)
 
-    final DisplayMetrics activityDisplayMetrics = activity.getResources().getDisplayMetrics();
-    activityDisplayMetrics.density = targetDensity;
-    activityDisplayMetrics.scaledDensity = targetScaledDensity;
-    activityDisplayMetrics.densityDpi = targetDensityDpi
-}
-```
+优点：
+* 使用成本非常低，操作非常简单，使用该方案后在页面布局时不需要额外的代码和操作，这点可以说完虐其他屏幕适配方案
+* 侵入性非常低，该方案和项目完全解耦，在项目布局时不会依赖哪怕一行该方案的代码，而且使用的还是 Android 官方的 API，意味着当你遇到什么问题无法解决，想切换为其他屏幕适配方案时，基本不需要更改之前的代码，整个切换过程几乎在瞬间完成，会少很多麻烦，节约很多时间，试错成本接近于 0
+* 可适配三方库的控件和系统的控件(不止是是 Activity 和 Fragment，Dialog、Toast 等所有系统控件都可以适配)，由于修改的 density 在整个项目中是全局的，所以只要一次修改，项目中的所有地方都会受益
+* 不会有任何性能的损耗
+
+缺点：
+* 暂时没发现其他什么很明显的缺点，已知的缺点有一个，那就是第三个优点，它既是这个方案的优点也同样是缺点，但是就这一个缺点也是非常致命的。
+只需要修改一次 density，项目中的所有地方都会自动适配，适配范围是不可控的。第三方库用的设计图我我们的设计图尺寸可能是不一样的
+* 可以使用px为单位，但后期会带来问题：当不再使用这种适配方案是就是灾难
+
+解决方法：
+按 Activity 为单位，取消当前 Activity 的适配效果，改用其他的适配方案
 
 ## 刘海屏适配
 - Android P 刘海屏适配方案
@@ -2165,55 +2217,6 @@ public void run() {
     mTid = -1;
 }
 ```
-
-## IntentService
-IntentService 可用于执行后台耗时的任务，当任务执行后会自动停止，由于其是 Service 的原因，它的优先级比单纯的线程要高，所以 IntentService 适合执行一些高优先级的后台任务。在实现上，IntentService 封装了 HandlerThread 和 Handler。
-
-``IntentService.java``
-```java
-@Override
-public void onCreate() {
-    // TODO: It would be nice to have an option to hold a partial wakelock
-    // during processing, and to have a static startService(Context, Intent)
-    // method that would launch the service & hand off a wakelock.
-
-    super.onCreate();
-    HandlerThread thread = new HandlerThread("IntentService[" + mName + "]");
-    thread.start();
-
-    mServiceLooper = thread.getLooper();
-    mServiceHandler = new ServiceHandler(mServiceLooper);
-}
-```
-
-IntentService 第一次启动时，会在 onCreatea 方法中创建一个 HandlerThread，然后使用的 Looper 来构造一个 Handler 对象 mServiceHandler，这样通过 mServiceHandler 发送的消息最终都会在 HandlerThread 中执行。每次启动 IntentService，它的 onStartCommand 方法就会调用一次，onStartCommand 中处理每个后台任务的 Intent，onStartCommand 调用了 onStart 方法：
-
-``IntentService.java``
-```java
-private final class ServiceHandler extends Handler {
-    public ServiceHandler(Looper looper) {
-        super(looper);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-        onHandleIntent((Intent)msg.obj);
-        stopSelf(msg.arg1);
-    }
-}
-
-···
-
-@Override
-public void onStart(@Nullable Intent intent, int startId) {
-    Message msg = mServiceHandler.obtainMessage();
-    msg.arg1 = startId;
-    msg.obj = intent;
-    mServiceHandler.sendMessage(msg);
-}
-```
-
-可以看出，IntentService 仅仅是通过 mServiceHandler 发送了一个消息，这个消息会在 HandlerThread 中被处理。mServiceHandler 收到消息后，会将 Intent 对象传递给 onHandlerIntent 方法中处理，执行结束后，通过 stopSelf(int startId) 来尝试停止服务。（stopSelf() 会立即停止服务，而 stopSelf(int startId) 则会等待所有的消息都处理完毕后才终止服务）。
 
 ## 线程池
 线程池的优点有以下：
